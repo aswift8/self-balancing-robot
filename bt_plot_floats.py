@@ -67,56 +67,41 @@ async def communication(mac_addr: str):
                 while len(data_queue) > 1:
                     command = data_queue[0]
                     if command == 0:
-                        # String
+                        # String - Message
                         length = data_queue[1]
                         if len(data_queue) < length+2:
                             break
-                        message = str(data_queue[2:2+length])[2:-1]
+                        message = str(data_queue[2:2+length])[12:-2]
+                        print(f"Message: {message}")
                         data_queue = data_queue[2+length:]
                     elif command == 1:
-                        # int
-                        if len(data_queue) < 3:
+                        # String - Error
+                        length = data_queue[1]
+                        if len(data_queue) < length+2:
                             break
-                        i, = struct.unpack('<h', data_queue[1:3])
-                        print(f"Got int: {i}")
-                        data_queue = data_queue[3:]
+                        message = str(data_queue[2:2+length])[12:-2]
+                        print(f"Error: {message}")
+                        data_queue = data_queue[2+length:]
                     elif command == 2:
-                        # float
-                        if len(data_queue) < 5:
-                            break
-                        f, = struct.unpack('<f', data_queue[1:5])
-                        print(f"Got float: {f}")
-                        data_queue = data_queue[5:]
-                    elif command == 3:
-                        # readings
-                        if len(data_queue) < 17:
-                            break
-                        timestamp, ax, ay, az, gx, gy, gz = struct.unpack('<L6h', data_queue[1:17])
-                        print(f"Got readings: {timestamp}    {ax:>6},{ay:>6},{az:>6}    {gx:>6},{gy:>6},{gz:>6}")
-                        data_queue = data_queue[17:]
-                    elif command == 4:
-                        # readings
-                        if len(data_queue) < 13:
-                            break
-                        timestamp, theta, tau = struct.unpack('<L2f', data_queue[1:13])
-                        print(f"Got readings: {timestamp}    {theta:>6}    {tau:>6}")
-                        data_queue = data_queue[13:]
-                    elif command == 5:
-                        # Stamped float list
-                        length =data_queue[1]
-                        if len(data_queue) < length*4 + 6:
+                        # Timestamped (short) int list
+                        count = data_queue[1]
+                        message_length = 1 + 1 + 4 + 2 * count
+                        if len(data_queue) < message_length:
                             break
                         timestamp, = struct.unpack('<L', data_queue[2:6])
-                        vals = struct.unpack(f'<{length}f', data_queue[6:6+length*4])
-                        #print(f"Floats {timestamp} - {vals}")
-                        if length != float_count:
-                            raise ValueError(f"Length: {length}, but expected {float_count}")
-                        ts.append(timestamp/1000)
-                        ts = ts[1:]
-                        for i in range(float_count):
-                            rs[i].append(vals[i])
-                            rs[i] = rs[i][1:]
-                        data_queue = data_queue[6+length*4:]
+                        vals = struct.unpack(f'<{count}h', data_queue[6:message_length])
+                        print(f"Got ints: {timestamp}    {vals}")
+                        data_queue = data_queue[message_length:]
+                    elif command == 3:
+                        # Timestamped float list
+                        count = data_queue[1]
+                        message_length = 1 + 1 + 4 + 4 * count
+                        if len(data_queue) < message_length:
+                            break
+                        timestamp, = struct.unpack('<L', data_queue[2:6])
+                        vals = struct.unpack(f'<{count}f', data_queue[6:message_length])
+                        print(f"Got floats: {timestamp}    {vals}")
+                        data_queue = data_queue[message_length:]
                 update_graph()
             await client.write_gatt_char(w_char, bytes('e', 'ascii'))
         except KeyboardInterrupt:
