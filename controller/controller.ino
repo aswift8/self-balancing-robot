@@ -4,11 +4,13 @@
 #include "MsTimer2.h"
 #include "mode.h"
 #include "SendData.h"
+#include "InputOutput.h"
 
 void setup() {
     Serial.begin(9600);
     voltageInit();
     rgb.initialize();
+    ioInit();
     MsTimer2::set(5, timerLoop);
     mode = STOP;
     MsTimer2::start();
@@ -49,4 +51,11 @@ void loop() {
 
 void timerLoop() {
     //
+    sei();
+    updateInput();
+    // Update controller
+    if (low_power || !has_connected)
+        updateOutput(0, 0);
+    else
+        updateOutput(50, 50);
 }
