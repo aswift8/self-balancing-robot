@@ -1,6 +1,8 @@
 #ifndef SendData_h
 #define SendData_h
 
+unsigned long start_time = 0;
+
 void sendMessage(const String& msg) {
     // 1[0] 1[length] length[message]
     if (2 + msg.length() > 255)
@@ -47,7 +49,7 @@ void sendStampedInts(unsigned long timestamp, byte count, int* ints) {
     Serial.write(byte(2));
     Serial.write(count);
     binaryTimestamp ts;
-    ts.timestamp = timestamp;
+    ts.timestamp = timestamp - start_time;
     Serial.write(ts.binary, 4);
     binaryInt b_int;
     for (unsigned int i=0; i<count; i++) {
@@ -63,13 +65,17 @@ void sendStampedFloats(unsigned long timestamp, byte count, float* floats) {
     Serial.write(byte(3));
     Serial.write(count);
     binaryTimestamp ts;
-    ts.timestamp = timestamp;
+    ts.timestamp = timestamp - start_time;
     Serial.write(ts.binary, 4);
     binaryFloat f;
     for (unsigned int i=0; i<count; i++) {
         f.f = floats[i];
         Serial.write(f.binary, 4);
     }
+}
+
+void resetTime() {
+    start_time = millis();
 }
 
 #endif

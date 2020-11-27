@@ -7,7 +7,7 @@ void voltageInit()
 }
 void voltageMeasure() //测量电压
 {
-  if (millis() - vol_measure_time > 100) //每1000毫秒测量一次
+  if (millis() - vol_measure_time > 1000) //每1000毫秒测量一次
   {
     vol_measure_time = millis();
     double voltage = (analogRead(VOL_MEASURE_PIN) * 1.1 / 1024) * ((10 + 1.5) / 1.5); //读取电压值
