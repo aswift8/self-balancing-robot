@@ -1,3 +1,4 @@
+
 #ifndef WheelController_h
 #define WheelController_h
 
@@ -9,20 +10,23 @@ volatile float wheel_output_l, wheel_output_r;
 
 float theta_last;
 float tau_last;
+float custom_controller_gain = 20000;
+bool use_custom_controller = true;
 void updateBalance(float angular_position, float angular_velocity) {
-    /*
-    // Own controller
-    float theta = angular_position / 57.3f;
-
-    float a0 = 0.6118125, a1 = -0.5881875, b0 = 2.075, b1 = -1.925;
-    float tau = a0/b0 * theta + a1/b0 * theta_last - b1/b0 * tau_last;
-
-    tau_last = tau;
-    theta_last = theta;
-
-    balance_output = tau / 2.0 * 20000;     // TODO: find a better constant for torque -> speed(?)
-    */
-    balance_output = 55 * angular_position + 0.75 * angular_velocity;
+    if (use_custom_controller) {
+        // Own controller
+        float theta = angular_position / 57.3f;
+    
+        float a0 = 0.6118125, a1 = -0.5881875, b0 = 2.075, b1 = -1.925;
+        float tau = a0/b0 * theta + a1/b0 * theta_last - b1/b0 * tau_last;
+    
+        tau_last = tau;
+        theta_last = theta;
+    
+        balance_output = tau / 2.0 * 20000;     // TODO: find a better constant for torque -> speed(?)
+    } else {
+        balance_output = 55 * angular_position + 0.75 * angular_velocity;
+    }
 }
 
 unsigned int speed_control_period_count = 0;
@@ -53,6 +57,15 @@ void updateController(float angular_position, float angular_velocity, float whee
     updateMovement(wheel_speed_l, wheel_speed_r, angular_vel_z);
     wheel_output_l = balance_output + movement_output_l;
     wheel_output_r = balance_output + movement_output_r;
+}
+
+void setCustomController(float gain) {
+    custom_controller_gain = gain;
+    use_custom_controller = true;
+}
+
+void setDefaultController() {
+    use_custom_controller = false;
 }
 
 void reset() {

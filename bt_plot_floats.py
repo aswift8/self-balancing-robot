@@ -59,6 +59,11 @@ async def communication(mac_addr: str):
             print(f"Descriptors:     {descriptors}")
             await client.start_notify(r_char, callback)
             await client.write_gatt_char(5, bytes('s', 'ascii'))
+            #await client.write_gatt_char(5, bytes('c', 'ascii'))
+            desired_gain = bytearray(struct.pack('f', 15000.0))
+            print(f"Sending gain: {str(desired_gain)}")
+            await client.write_gatt_char(5, bytes('<k', 'ascii'))
+            await client.write_gatt_char(5, desired_gain)
             while run:
                 await client.write_gatt_char(w_char, bytes(' ', 'ascii'))
                 time.sleep(0.05)
