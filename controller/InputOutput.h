@@ -44,6 +44,8 @@ void updateInput() {
     encoder_count_r = 0;
     ts = millis();
     mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    int ax0=670, ay0=50, az0=300, gx0=-1520, gy0=390, gz0=60; // MPU calibration
+    ax-=ax0; ay-=ay0; az-=az0; gx-=gx0; gy-=gy0; gz-=gz0;     // MPU calibration
     
     float dt = 0.005, Q_angle = 0.001, Q_gyro = 0.005, R_angle = 0.5, C_0 = 1, K1 = 0.05;
     kfilter.Angle(ax, ay, az, gx, gy, gz, dt, Q_angle, Q_gyro, R_angle, C_0, K1);

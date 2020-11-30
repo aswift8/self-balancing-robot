@@ -5,7 +5,7 @@ from bleak import BleakClient
 import struct
 import matplotlib.pyplot as plt
 
-float_count = 5
+int_count = 6
 
 run = True
 
@@ -16,23 +16,26 @@ def on_close(event):
 fig = plt.figure()
 fig.canvas.mpl_connect('close_event', on_close)
 fig.canvas.set_window_title("Raw Readings - Bluetooth")
-graphs = [fig.add_subplot(float_count, 1, i+1) for i in range(float_count)]
+graphs = [fig.add_subplot(2, int_count//2, i+1) for i in range(int_count)]
+for i in range(int_count):
+    graphs[i].set_title("ax ay az gx gy gz".split(' ')[i])
 max_readings = 100
 ts = [0] * max_readings
-rs = [[0] * max_readings for _ in range(float_count)]
-plots = [graphs[i].plot(ts, rs[i], color=f"C{i}")[0] for i in range(float_count)]
+rs = [[0] * max_readings for _ in range(int_count)]
+rsavg = [[0] * max_readings for _ in range(int_count)]
+plots = [graphs[i].plot(ts, rs[i], color=f"C{i}")[0] for i in range(int_count)]
 plt.ion()
 plt.show()
 data_queue = bytearray()
 
 def update_graph():
-    global float_count, ts, rs, plots, graphs, plt
+    global int_count, ts, rs, plots, graphs, plt
     # Update graph
-    for i in range(float_count):
+    for i in range(int_count):
         plots[i].set_xdata(ts)
         plots[i].set_ydata(rs[i])
         graphs[i].set_xlim([ts[0],ts[-1]])
-        graphs[i].set_ylim([min(rs[i]), max(rs[i])])
+        graphs[i].set_ylim([-32768, 32767])
     plt.draw()
     plt.pause(0.001)
 
@@ -63,8 +66,8 @@ async def communication(mac_addr: str):
             #print(f"Sending gain: {str(desired_gain)}")
             #await client.write_gatt_char(5, bytes('<k', 'ascii'))
             #await client.write_gatt_char(5, desired_gain)
-            await client.write_gatt_char(5, bytes('c', 'ascii'))
-            await client.write_gatt_char(5, bytes('f', 'ascii'))
+            await client.write_gatt_char(5, bytes('m', 'ascii'))
+            await client.write_gatt_char(5, bytes('r', 'ascii'))
             await client.write_gatt_char(5, bytes('s', 'ascii'))
             while run:
                 await client.write_gatt_char(w_char, bytes(' ', 'ascii'))
@@ -97,7 +100,13 @@ async def communication(mac_addr: str):
                             break
                         timestamp, = struct.unpack('<L', data_queue[2:6])
                         vals = struct.unpack(f'<{count}h', data_queue[6:message_length])
-                        print(f"Got ints: {timestamp}    {vals}")
+                        #print(f"Got ints: {timestamp}    {vals}")
+                        if (len(vals) == int_count):
+                            ts.append(timestamp/1000)
+                            ts = ts[1:]
+                            for i in range(int_count):
+                                rs[i].append(vals[i])
+                                rs[i] = rs[i][1:]
                         data_queue = data_queue[message_length:]
                     elif command == 3:
                         # Timestamped float list
@@ -107,13 +116,7 @@ async def communication(mac_addr: str):
                             break
                         timestamp, = struct.unpack('<L', data_queue[2:6])
                         vals = struct.unpack(f'<{count}f', data_queue[6:message_length])
-                        #print(f"Got floats: {timestamp}    {vals}")
-                        if (len(vals) == float_count):
-                            ts.append(timestamp/1000)
-                            ts = ts[1:]
-                            for i in range(float_count):
-                                rs[i].append(vals[i])
-                                rs[i] = rs[i][1:]
+                        print(f"Got floats: {timestamp}    {vals}")
                         data_queue = data_queue[message_length:]
                 update_graph()
             await client.write_gatt_char(w_char, bytes('e', 'ascii'))

@@ -7,6 +7,8 @@
 #include "InputOutput.h"
 #include "WheelController.h"
 
+bool send_raw_readings = false;
+
 void setup() {
     Serial.begin(9600);
     voltageInit();
@@ -45,7 +47,7 @@ void loop() {
             sendMessage(String("Manufacturer controller"));
             controller::setDefaultController();
             break;
-        case 'k':
+        case 'k':{
             binaryFloat val;
             while (Serial.available() < 4)
                 delay(10);
@@ -57,6 +59,14 @@ void loop() {
                 msg += String(val.binary[i]);
             sendMessage(msg);
             controller::setCustomController(val.f);
+            break;}
+        case 'r':
+            sendMessage(String("Raw MPU readings"));
+            send_raw_readings = true;
+            break;
+        case 'f':
+            sendMessage(String("Float readings"));
+            send_raw_readings = false;
             break;
         }
     }
@@ -85,7 +95,7 @@ void timerLoop() {
     //
     sei();
     io::updateInput();
-    controller::updateController(io::filtered_pos, io::filtered_vel, io::wheel_speed_l, io::wheel_speed_r, io::filtered_vel);
+    controller::updateController(io::filtered_pos, io::filtered_vel, io::wheel_speed_l, io::wheel_speed_r, io::filtered_vel_z);
     if (low_power || !has_connected)
         io::updateOutput(0, 0);
     else
@@ -93,14 +103,26 @@ void timerLoop() {
     if (has_connected) {
         if (++loop_count >= 4) {
             loop_count = 0;
-            float vals[] = {
-              io::filtered_pos,
-              io::filtered_vel,
-              controller::balance_output,
-              controller::movement_output_l,
-              controller::wheel_output_l
-              };
-            sendStampedFloats(millis(), 5, vals);
+            if (send_raw_readings) {
+                int vals[] = {
+                    io::ax,
+                    io::ay,
+                    io::az,
+                    io::gx,
+                    io::gy,
+                    io::gz
+                };
+                sendStampedInts(millis(), 6, vals);
+            } else {
+                float vals[] = {
+                    io::filtered_pos,
+                    io::filtered_vel,
+                    controller::balance_output,
+                    controller::movement_output_l,
+                    controller::wheel_output_l
+                };
+                sendStampedFloats(millis(), 5, vals);
+            }
         }
     }
 }

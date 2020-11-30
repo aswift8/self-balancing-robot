@@ -47,10 +47,10 @@ void updateMovement(float wheel_speed_l, float wheel_speed_r, float angular_vel_
         car_speed_integral += speed_filter;
         car_speed_integral = constrain(car_speed_integral, -3000, 3000);
         speed_control_output = -10 * speed_filter - 0.26*car_speed_integral;
-        rotation_control_output = 0;//0.5 * angular_vel_z;
+        rotation_control_output = 0.5 * angular_vel_z;
     }
-    movement_output_l = -speed_control_output + rotation_control_output;
-    movement_output_r = -speed_control_output - rotation_control_output;
+    movement_output_l = -speed_control_output - rotation_control_output;
+    movement_output_r = -speed_control_output + rotation_control_output;
 }
 void updateController(float angular_position, float angular_velocity, float wheel_speed_l, float wheel_speed_r, float angular_vel_z) {
     updateBalance(angular_position, angular_velocity);
