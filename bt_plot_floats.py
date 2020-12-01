@@ -33,6 +33,7 @@ def update_graph():
         plots[i].set_ydata(rs[i])
         graphs[i].set_xlim([ts[0],ts[-1]])
         graphs[i].set_ylim([min(rs[i]), max(rs[i])])
+    print(f"Limits: {min(rs[0])} {max(rs[0])}")
     plt.draw()
     plt.pause(0.001)
 
@@ -58,12 +59,11 @@ async def communication(mac_addr: str):
             print(f"Characteristics: {characteristics}")
             print(f"Descriptors:     {descriptors}")
             await client.start_notify(r_char, callback)
-            #await client.write_gatt_char(5, bytes('c', 'ascii'))
-            #desired_gain = bytearray(struct.pack('f', 18000.0))
-            #print(f"Sending gain: {str(desired_gain)}")
-            #await client.write_gatt_char(5, bytes('<k', 'ascii'))
+            
+            #desired_gain = bytearray(struct.pack('f', 38000.0))
+            #await client.write_gatt_char(5, bytes('k', 'ascii'))
             #await client.write_gatt_char(5, desired_gain)
-            await client.write_gatt_char(5, bytes('c', 'ascii'))
+            await client.write_gatt_char(5, bytes('m', 'ascii'))
             await client.write_gatt_char(5, bytes('f', 'ascii'))
             await client.write_gatt_char(5, bytes('s', 'ascii'))
             while run:

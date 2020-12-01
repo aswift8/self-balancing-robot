@@ -10,7 +10,7 @@ volatile float wheel_output_l, wheel_output_r;
 
 float theta_last;
 float tau_last;
-float custom_controller_gain = 20000;
+float custom_controller_gain = 32000;
 bool use_custom_controller = true;
 void updateBalance(float angular_position, float angular_velocity) {
     if (use_custom_controller) {
@@ -23,7 +23,7 @@ void updateBalance(float angular_position, float angular_velocity) {
         tau_last = tau;
         theta_last = theta;
     
-        balance_output = tau / 2.0 * 20000;     // TODO: find a better constant for torque -> speed(?)
+        balance_output = tau / 2.0 * custom_controller_gain;
     } else {
         balance_output = 55 * angular_position + 0.75 * angular_velocity;
     }
