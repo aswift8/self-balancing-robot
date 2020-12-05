@@ -17,8 +17,8 @@ void updateBalance(float angular_position, float angular_velocity) {
         // Own controller
         float theta = angular_position / 57.3f;
     
-        float a0 = 0.6118125, a1 = -0.5881875, b0 = 2.075, b1 = -1.925;
-        float tau = a0/b0 * theta + a1/b0 * theta_last - b1/b0 * tau_last;
+        float a0 = 2.075, a1 = -1.925, b0 = 0.6118125, b1 = -0.5881875;
+        float tau = b0/a0 * theta + b1/a0 * theta_last - a1/a0 * tau_last;
     
         tau_last = tau;
         theta_last = theta;

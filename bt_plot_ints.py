@@ -67,7 +67,7 @@ async def communication(mac_addr: str):
             #print(f"Sending gain: {str(desired_gain)}")
             #await client.write_gatt_char(5, bytes('k', 'ascii'))
             #await client.write_gatt_char(5, desired_gain)
-            await client.write_gatt_char(5, bytes('m', 'ascii'))
+            await client.write_gatt_char(5, bytes('c', 'ascii'))
             await client.write_gatt_char(5, bytes('r', 'ascii'))
             await client.write_gatt_char(5, bytes('s', 'ascii'))
             while run:

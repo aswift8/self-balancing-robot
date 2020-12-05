@@ -17,7 +17,9 @@ fig = plt.figure()
 fig.canvas.mpl_connect('close_event', on_close)
 fig.canvas.set_window_title("Raw Readings - Bluetooth")
 graphs = [fig.add_subplot(float_count, 1, i+1) for i in range(float_count)]
-max_readings = 100
+for i in range(float_count):
+    graphs[i].set_title(["Angle","Angular Vel","Balance Output","Movement Output","Total Output"][i])
+max_readings = 200
 ts = [0] * max_readings
 rs = [[0] * max_readings for _ in range(float_count)]
 plots = [graphs[i].plot(ts, rs[i], color=f"C{i}")[0] for i in range(float_count)]
@@ -33,7 +35,6 @@ def update_graph():
         plots[i].set_ydata(rs[i])
         graphs[i].set_xlim([ts[0],ts[-1]])
         graphs[i].set_ylim([min(rs[i]), max(rs[i])])
-    print(f"Limits: {min(rs[0])} {max(rs[0])}")
     plt.draw()
     plt.pause(0.001)
 
@@ -63,7 +64,7 @@ async def communication(mac_addr: str):
             #desired_gain = bytearray(struct.pack('f', 38000.0))
             #await client.write_gatt_char(5, bytes('k', 'ascii'))
             #await client.write_gatt_char(5, desired_gain)
-            await client.write_gatt_char(5, bytes('m', 'ascii'))
+            await client.write_gatt_char(5, bytes('c', 'ascii'))
             await client.write_gatt_char(5, bytes('f', 'ascii'))
             await client.write_gatt_char(5, bytes('s', 'ascii'))
             while run:
