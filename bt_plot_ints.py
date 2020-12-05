@@ -103,11 +103,12 @@ async def communication(mac_addr: str):
                         vals = struct.unpack(f'<{count}h', data_queue[6:message_length])
                         #print(f"Got ints: {timestamp}    {vals}")
                         if (len(vals) == int_count):
-                            ts.append(timestamp/1000)
-                            ts = ts[1:]
-                            for i in range(int_count):
-                                rs[i].append(vals[i])
-                                rs[i] = rs[i][1:]
+                            if timestamp/1000 < ts[-1]+2:
+                                ts.append(timestamp/1000)
+                                ts = ts[1:]
+                                for i in range(int_count):
+                                    rs[i].append(vals[i])
+                                    rs[i] = rs[i][1:]
                         data_queue = data_queue[message_length:]
                     elif command == 3:
                         # Timestamped float list

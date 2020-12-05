@@ -29,10 +29,10 @@ void loop() {
         char c = Serial.read();
         switch (c) {
         case 's':
+            resetTime();        // SendData method
             mode = MOVE;
             sendMessage(String("Start"));
             controller::reset();
-            resetTime();        // SendData method
             break;
         case 'e':
             mode = STOP;
