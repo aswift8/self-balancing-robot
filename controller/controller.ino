@@ -40,8 +40,8 @@ void loop() {
             has_connected = false;
             break;
         case 'c':
-            sendMessage(String("Custom controller k=20000"));
-            controller::setCustomController(20000);
+            sendMessage(String("Custom controller k=32000"));
+            controller::setCustomController(32000);
             break;
         case 'm':
             sendMessage(String("Manufacturer controller"));
